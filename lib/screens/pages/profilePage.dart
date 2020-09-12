@@ -56,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     getUserID();
     getUserTweets();
-   // getUserInfo();
+   getUserInfo();
   }
 
   /// likes and dislikes
@@ -184,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: Column(
                   children: [
-                    Text('username',
+                    Text('CHAOLU',
                         style: googleFont(20, Colors.white, FontWeight.w300)),
                     SizedBox(height: 15),
                     Row(
