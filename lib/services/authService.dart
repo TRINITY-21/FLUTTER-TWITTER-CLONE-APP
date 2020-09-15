@@ -4,6 +4,7 @@ import 'package:twitterClone/services/databaseUser.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  
 
   ///User model to retrieve info needed from the user
 
@@ -52,4 +53,6 @@ class AuthService {
   // logout() {
   //   return _auth.signOut();
   // }
+
+
 }

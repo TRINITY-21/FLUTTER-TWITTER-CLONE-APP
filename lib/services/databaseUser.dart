@@ -1,12 +1,14 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:twitterClone/models/userDocModel.dart';
+import 'package:twitterClone/models/userModel.dart';
 
 class DatabaseUser {
   String uid;
 
   final CollectionReference _db =
       FirebaseFirestore.instance.collection("Users");
-
 
   DatabaseUser({uid});
 
@@ -58,4 +60,9 @@ class DatabaseUser {
     }).toList();
   }
 
+  Future updateUser(String name) async {
+    return _db
+        .doc(uid)
+        .update({'username': name});
+  }
 }

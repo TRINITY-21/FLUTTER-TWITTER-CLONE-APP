@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twitterClone/screens/commentsPage.dart';
 import 'package:twitterClone/screens/pages/addTweetPage.dart';
+import 'package:twitterClone/screens/pages/viewUsersPage.dart';
 import 'package:twitterClone/utils/googleFont.dart';
 
 class TweetsPage extends StatefulWidget {
@@ -98,22 +99,22 @@ class _TweetsPageState extends State<TweetsPage> {
 
              Icon(Icons.notifications_active),
           ]),
-          actions: [
-            InkWell(
-                onTap: () async{
-                  //await authService.logout();
-                },
-                child: CircleAvatar(
-                           backgroundColor: Colors.white,
-                            radius: 20,
-                            backgroundImage:
-                                NetworkImage('https://cdn.pixabay.com/photo/2013/07/13/10/07/man-156584__340.png'),
-                          ),
-            ),
-          ],
+          // actions: [
+          //   InkWell(
+          //       onTap: () async{
+          //         //await authService.logout();
+          //       },
+          //       child: CircleAvatar(
+          //                  backgroundColor: Colors.white,
+          //                   radius: 20,
+          //                   backgroundImage:
+          //                       NetworkImage('https://cdn.pixabay.com/photo/2013/07/13/10/07/man-156584__340.png'),
+          //                 ),
+          //   ),
+          // ],
         ),
         body: StreamBuilder(
-            stream: tweetCol.snapshots(),
+            stream: tweetCol.orderBy('username').snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return CircularProgressIndicator();
@@ -127,16 +128,24 @@ class _TweetsPageState extends State<TweetsPage> {
 
                         child: ListTile(
                           leading: CircleAvatar(
-                           backgroundColor: Colors.white,
+                           backgroundColor:Colors.purple,
 
                             backgroundImage:
                                 NetworkImage(tweetDoc.data()['profilePic']),
                           ),
                           title: Row(
                             children: [
-                              Text('${tweetDoc.data()['username']}'.toLowerCase(),
-                                  style: googleFont(
-                                      20, Colors.white, FontWeight.w400)),
+                              InkWell(
+                                 onTap :() {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) => ViewUsersPage(viewId: tweetDoc.data()['uid'],)),
+                        );
+                      },  
+                      child: Text('${tweetDoc.data()['username']}'.toLowerCase(),
+                                    style: googleFont(
+                                        20, Colors.white, FontWeight.w400)),
+                              ),
                               SizedBox(width:2),
                               Text('@tweetMe',
                                   style: googleFont(

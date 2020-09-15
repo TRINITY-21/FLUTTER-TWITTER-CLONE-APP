@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:twitterClone/models/userModel.dart';
 import 'package:twitterClone/services/authService.dart';
+import 'package:twitterClone/services/databaseUser.dart';
 
 class UserProvider with ChangeNotifier {
   final AuthService authService = AuthService();
+  DatabaseUser db = DatabaseUser();
+
   String _name;
   String _password;
   String _profilePic;
@@ -20,6 +23,8 @@ class UserProvider with ChangeNotifier {
 
   changeName(String value) {
     _name = value;
+        print(_name);
+
     notifyListeners();
   }
 
@@ -30,11 +35,13 @@ class UserProvider with ChangeNotifier {
 
   changePassword(String value) {
     _password = value;
+
     notifyListeners();
   }
 
   changePic(String value) {
     _profilePic = value;
+    print(_profilePic);
     notifyListeners();
   }
 
@@ -55,7 +62,5 @@ class UserProvider with ChangeNotifier {
   //   _db.createTweet(tid:tid, profilePic, uid, tweet, imgUrl, likes, commentCount, shares, type)
   // }
 
-  logout(String id){
-    
-  }
+  logout(String id) {}
 }

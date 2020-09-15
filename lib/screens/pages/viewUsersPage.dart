@@ -3,27 +3,25 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:twitterClone/screens/commentsPage.dart';
-import 'package:twitterClone/screens/pages/editPage.dart';
 import 'package:twitterClone/utils/googleFont.dart';
 
-class ProfilePage extends StatefulWidget {
-  final String id;
-  final String tid;
-  final String userId;
-  ProfilePage({this.id, this.tid, this.userId});
+class ViewUsersPage extends StatefulWidget {
+  final String viewId;
+  ViewUsersPage({this.viewId});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _ViewUsersPageState createState() => _ViewUsersPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  String uid;
+class _ViewUsersPageState extends State<ViewUsersPage> {
   Stream userStream;
+  String uid;
   String profilePic;
   String username;
   bool dataInfo = false;
-  int following;
   int followers;
+  int following;
+  bool isFollowing = false;
 
   Future getUserID() async {
     var user = FirebaseAuth.instance.currentUser;
@@ -32,11 +30,10 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  ///  user tweets
   Future getUserTweets() async {
     // ignore: await_only_futures
     //final user = await FirebaseAuth.instance.currentUser;
-    DocumentSnapshot userDoc = await db.doc(uid).get();
+    DocumentSnapshot userDoc = await db.doc(widget.viewId).get();
     ////print(userTweet.data());
     print(userDoc.data());
 
@@ -46,50 +43,47 @@ class _ProfilePageState extends State<ProfilePage> {
         .snapshots();
   }
 
-  ///  user tweets
   Future getUserInfo() async {
     // ignore: await_only_futures
     try {
       //final user = FirebaseAuth.instance.currentUser;
 
-      DocumentSnapshot userDocu = await db.doc(uid).get();
+      DocumentSnapshot userDocu = await db.doc(widget.viewId).get();
+      final follwersDoc =
+          await db.doc(widget.viewId).collection('followers').get();
+
+      final followingDoc =
+          await db.doc(widget.viewId).collection('following').get();
+
       setState(() {
         username = userDocu.data()['username'];
         profilePic = userDocu.data()['profilePic'];
         dataInfo = true;
-        //uid = userDocu.data()['uid'];
+        followers = follwersDoc.docs.length;
+        following = followingDoc.docs.length;
       });
 
       print(userDocu.data());
-      //print(profilePic);
+      print(profilePic);
     } on Exception catch (e) {
       print(e.toString());
     }
   }
 
-  ////////////   followers
-
-  @override
-  void initState() {
-    super.initState();
-    getUserID();
-    getUserTweets();
-    getUserInfo();
-    followInfo();
-  }
-
   /// likes and dislikes
 
   likeTweet(String tid) async {
+    final user = FirebaseAuth.instance.currentUser;
+
     DocumentSnapshot userDoc = await tweetCol.doc(tid).get();
 
-    if (userDoc.data()['likes'].contains(uid)) {
+    if (userDoc.data()['likes'].contains(user.uid)) {
       tweetCol.doc(tid).update({
-        'likes': FieldValue.arrayRemove([uid])
+        'likes': FieldValue.arrayRemove([user.uid])
       });
     } else {
       tweetCol.doc(tid).update({
-        'likes': FieldValue.arrayUnion([uid])
+        'likes': FieldValue.arrayUnion([user.uid])
       });
     }
   }
@@ -102,39 +96,53 @@ class _ProfilePageState extends State<ProfilePage> {
     tweetCol.doc(tid).update({'shares': shareDoc.data()['shares'] + 1});
   }
 
-  followInfo() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final followingDoc = await db.doc(user.uid).collection('following').get();
-    final followersDoc = await db.doc(user.uid).collection('followers').get();
+  /////  follow user
 
-    setState(() {
-      following = followingDoc.docs.length;
-      followers = followersDoc.docs.length;
-    });
+  followUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    DocumentSnapshot follow =
+        await db.doc(widget.viewId).collection('followers').doc(user.uid).get();
+
+    if (!follow.exists) {
+      db.doc(widget.viewId).collection('followers').doc(user.uid).set({});
+      setState(() {
+        followers++;
+        //following++;
+        isFollowing = true;
+      });
+      print('followed');
+
+      db.doc(user.uid).collection('following').doc(widget.viewId).set({});
+      print('following');
+    } else {
+      db.doc(widget.viewId).collection('followers').doc(user.uid).delete();
+      print('followed delete');
+
+      db.doc(user.uid).collection('following').doc(widget.viewId).delete();
+      setState(() {
+        followers--;
+        //following--;
+        isFollowing = false;
+      });
+      print('following delete');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserID();
+    getUserTweets();
+    getUserInfo();
   }
 
   @override
   Widget build(BuildContext context) {
-    void _showSettingsPanel() {
-     showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (BuildContext context) {
-      return SingleChildScrollView(
-          child: Container(
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: SettingsForm(),
-      ));
-    });
-    }
-
     return Scaffold(
-      
         backgroundColor: Theme.of(context).primaryColorDark,
         appBar: AppBar(
           elevation: 0.0,
-          
           backgroundColor: Theme.of(context).primaryColor,
           centerTitle: true,
           title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -142,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Text("Profile",
                     style: googleFont(20, Colors.white, FontWeight.w500)),
-                SizedBox(width: 2),
+                SizedBox(width: 3),
                 // Text("Me",
                 //     style: googleFont(20, Colors.purple, FontWeight.bold)),
               ],
@@ -158,14 +166,14 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: () async {
                 //await authService.logout();
               },
-              child: dataInfo == true
-                  ? CircleAvatar(
-                      backgroundColor: Colors.purple,
-                      radius: 20,
-                      backgroundImage: NetworkImage(profilePic),
-                    )
-                  : Text(''),
-            )
+              child: dataInfo == true? CircleAvatar(
+                backgroundColor:  Colors.purple,
+                radius: 20,
+                backgroundImage: NetworkImage(
+                    profilePic),
+                    
+              ): Text(''),
+            ),
           ],
         ),
         body: dataInfo == true
@@ -181,7 +189,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Image(
                         image: NetworkImage(
                           profilePic,
+                          
                         ),
+                        
                       )),
                   Container(
                     margin: EdgeInsets.only(
@@ -192,8 +202,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       radius: 35,
                       backgroundImage: NetworkImage(
                         profilePic,
+                        
                       ),
-                      backgroundColor: Colors.purple,
+                      
+                      backgroundColor: Colors.purpleAccent,
                     ),
                   ),
                   Container(
@@ -215,16 +227,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Center(
                                 child: InkWell(
                               onTap: () {
-                                _showSettingsPanel();
-                                // Navigator.of(
-                                //     context)
-                                // .push(MaterialPageRoute(
-                                //     builder:
-                                //         (context) =>
-                                //             SettingsForm()) );
+                                followUser();
                               },
                               child: Text(
-                                "Edit Profile",
+                                isFollowing == true ? "Unfollow" : "Follow",
                                 style: googleFont(
                                     10, Colors.white, FontWeight.w500),
                               ),
@@ -238,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         Text(username.toUpperCase(),
-                            textScaleFactor: 1.3,
+                        textScaleFactor: 1.3,
                             style:
                                 googleFont(20, Colors.white, FontWeight.w500)),
                         SizedBox(height: 15),
@@ -275,7 +281,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     15, Colors.white, FontWeight.w400)),
                           ],
                         ),
-                        SizedBox(height: 20),
+                        
                         SizedBox(height: 10),
                         Container(
                             width: MediaQuery.of(context).size.width / 4,
@@ -290,9 +296,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                 "Tweets",
                                 style: googleFont(
                                     15, Colors.white, FontWeight.w500),
+                                    
                               ),
                             )),
+
                         SizedBox(height: 20),
+
                         StreamBuilder(
                             stream: userStream,
                             builder: (context, snapshot) {
@@ -312,7 +321,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             Theme.of(context).primaryColorDark,
                                         child: ListTile(
                                           leading: CircleAvatar(
-                                            backgroundColor: Colors.purple,
+                                            backgroundColor: Colors.white,
                                             backgroundImage: NetworkImage(
                                                 tweetDoc.data()['profilePic']),
                                           ),
@@ -507,7 +516,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                ]))
+                ])
+                )
             : Center(child: CircularProgressIndicator()));
   }
 }
