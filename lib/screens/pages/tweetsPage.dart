@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:twitterClone/screens/commentsPage.dart';
 import 'package:twitterClone/screens/pages/addTweetPage.dart';
@@ -16,20 +17,56 @@ class TweetsPage extends StatefulWidget {
 
 class _TweetsPageState extends State<TweetsPage> {
   String uid;
-  // final AuthService authService = AuthService();
 
-  Future getUserID() async {
-    // ignore: await_only_futures
-    final user = await FirebaseAuth.instance.currentUser;
-    
-      return uid = user.uid; 
-  }
+  ///////////   Firebase Cloud Messaging implementation
+  
+final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _message = 'generate token';
+  String _token = 'token';
 
   @override
   void initState() {
     super.initState();
-    getUserID();
+   getUserID();
+
+     ///////// firebase messaging test
+    
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        setState(() {
+          _message = '$message';
+        });
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        setState(() {
+          _message = '$message';
+        });
+      },
+      onResume: (Map<String, dynamic> message) async {
+        setState(() {
+          _message = '$message';
+        });
+      },
+    );
+
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      setState(() {
+        _token = '$token';
+      });
+    });
+
+    print(_token);
+    print(_message);
   }
+
+  Future getUserID() async {
+    // ignore: await_only_futures
+    final user = await FirebaseAuth.instance.currentUser;
+
+    return uid = user.uid;
+  }
+
 
   /// likes and dislikes
 
@@ -58,11 +95,10 @@ class _TweetsPageState extends State<TweetsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       backgroundColor: Colors.white12,
-
+        backgroundColor: Colors.white12,
         floatingActionButton: FloatingActionButton(
-          splashColor:Color(0xFF020E16),
-          backgroundColor:  Color(0xFF13536E),
+          splashColor: Color(0xFF020E16),
+          backgroundColor: Color(0xFF13536E),
           focusColor: Colors.teal,
           onPressed: () {
             Navigator.of(context).push(
@@ -75,7 +111,7 @@ class _TweetsPageState extends State<TweetsPage> {
         ),
         appBar: AppBar(
           elevation: 0.0,
-        backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).primaryColor,
           centerTitle: true,
           title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Row(
@@ -85,19 +121,15 @@ class _TweetsPageState extends State<TweetsPage> {
                 SizedBox(width: 2),
                 Text("Me",
                     style: googleFont(20, Colors.purple, FontWeight.bold)),
-                     
-                 
-            
               ],
             ),
             Image(
               image: AssetImage('assets/logo.png'),
-             //width: 50,
+              //width: 50,
               height: 45,
             ),
-            SizedBox(width:30),
-
-             Icon(Icons.notifications_active),
+            SizedBox(width: 30),
+            Icon(Icons.notifications_active),
           ]),
           // actions: [
           //   InkWell(
@@ -124,82 +156,81 @@ class _TweetsPageState extends State<TweetsPage> {
                   itemBuilder: (context, i) {
                     DocumentSnapshot tweetDoc = snapshot.data.docs[i];
                     return Card(
-                    color: Theme.of(context).primaryColorDark,
-
+                        color: Theme.of(context).primaryColorDark,
                         child: ListTile(
                           leading: CircleAvatar(
-                           backgroundColor:Colors.purple,
-
+                            backgroundColor: Colors.purple,
                             backgroundImage:
                                 NetworkImage(tweetDoc.data()['profilePic']),
                           ),
                           title: Row(
                             children: [
                               InkWell(
-                                 onTap :() {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => ViewUsersPage(viewId: tweetDoc.data()['uid'],)),
-                        );
-                      },  
-                      child: Text('${tweetDoc.data()['username']}'.toLowerCase(),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            ViewUsersPage(
+                                              viewId: tweetDoc.data()['uid'],
+                                            )),
+                                  );
+                                },
+                                child: Text(
+                                    '${tweetDoc.data()['username']}'
+                                        .toLowerCase(),
                                     style: googleFont(
                                         20, Colors.white, FontWeight.w400)),
                               ),
-                              SizedBox(width:2),
+                              SizedBox(width: 2),
                               Text('@tweetMe',
                                   style: googleFont(
-                                      15,Colors.grey, FontWeight.w300)),
+                                      15, Colors.grey, FontWeight.w300)),
                             ],
                           ),
                           subtitle: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (tweetDoc.data()['type'] == 1)
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text('${tweetDoc.data()['tweet']}',
-                                        style: googleFont(20, Colors.white,
-                                            FontWeight.w300)),
+                                        style: googleFont(
+                                            20, Colors.white, FontWeight.w300)),
                                   ),
                                 SizedBox(height: 10),
                                 if (tweetDoc.data()['type'] == 2)
-                                Container(
+                                  Container(
                                     width: double.infinity,
                                     child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child:Image(
-                                    image:
-                                        NetworkImage(tweetDoc.data()['image']),),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: Image(
+                                        image: NetworkImage(
+                                            tweetDoc.data()['image']),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                
                                 if (tweetDoc.data()['type'] == 3)
                                   Padding(
-                                    padding:
-                                const EdgeInsets.only(top: 0.0, bottom: 8.0),
-                                    child: Column(
-                                        children: [
-                                          Text(tweetDoc.data()['tweet'],
-                                              style: googleFont(
-                                                  20,
-                                                  Colors.white,
-                                                  FontWeight.w300)),
-                                          SizedBox(height: 15),
-
-                                           Container(
-                                      width: double.infinity,
-                                      child: ClipRRect(
+                                    padding: const EdgeInsets.only(
+                                        top: 0.0, bottom: 8.0),
+                                    child: Column(children: [
+                                      Text(tweetDoc.data()['tweet'],
+                                          style: googleFont(20, Colors.white,
+                                              FontWeight.w300)),
+                                      SizedBox(height: 15),
+                                      Container(
+                                        width: double.infinity,
+                                        child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
-                                          child:Image(
-                                      image:
-                                          NetworkImage(tweetDoc.data()['image']),),
-                                    ),
-                                ),
-                                        ]),
+                                          child: Image(
+                                            image: NetworkImage(
+                                                tweetDoc.data()['image']),
+                                          ),
+                                        ),
+                                      ),
+                                    ]),
                                   ),
                                 SizedBox(height: 15),
                                 Row(
