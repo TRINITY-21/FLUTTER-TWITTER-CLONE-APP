@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:twitterClone/models/userModel.dart';
 import 'package:twitterClone/services/databaseUser.dart';
 
 class EditProfile with ChangeNotifier {
@@ -25,7 +24,7 @@ class EditProfile with ChangeNotifier {
   }
 
   editUser() {
-    final user = UserModel(name: name, profilePic: profilePic);
-    db.updateUser(user);
+   
+   
   }
 }

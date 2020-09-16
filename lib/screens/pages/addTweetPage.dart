@@ -43,20 +43,30 @@ class _AddTweetPageState extends State<AddTweetPage> {
               onPressed: () {
                 getImage(ImageSource.camera);
               },
-              child: Text("camera", style: googleFont(20,Color(0xFF13536E))),
+              child: ListTile(
+                leading: Icon(Icons.camera),
+                title: Text("camera", style: googleFont(20,Color(0xFF13536E))),
+
+              ),
             ),
             SimpleDialogOption(
               onPressed: () {
                 getImage(ImageSource.gallery);
               },
-              child: Text("gallery", style: googleFont(20,Color(0xFF13536E))),
-            ),
+              child: ListTile(
+                leading: Icon(Icons.folder_shared),
+                title: Text("gallery", style: googleFont(20,Color(0xFF13536E))),
+
+              ),            ),
             SimpleDialogOption(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("cancel", style: googleFont(20,Color(0xFF13536E))),
-            ),
+              child: ListTile(
+                leading: Icon(Icons.cancel),
+                title: Text("cancel", style: googleFont(20,Color(0xFF13536E))),
+
+              ),            ),
           ]);
         });
   }

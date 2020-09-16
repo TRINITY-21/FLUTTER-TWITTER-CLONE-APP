@@ -34,6 +34,7 @@ dependencies:
   timeago:
   provider: ^4.3.2+1
   flutter_spinkit:
+  firebase_messaging:
 
 
   # The following adds the Cupertino Icons font to your application.

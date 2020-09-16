@@ -13,30 +13,42 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+
+
+    // _firebaseMessaging.configure(
+    //   onMessage: (Map<String, dynamic> message) async {
+    //     print("onMessage: $message");
+    //     _showItemDialog(message);
+    //   },
+    //   onBackgroundMessage: myBackgroundMessageHandler,
+    //   onLaunch: (Map<String, dynamic> message) async {
+    //     print("onLaunch: $message");
+    //     _navigateToItemDetail(message);
+    //   },
+    //   onResume: (Map<String, dynamic> message) async {
+    //     print("onResume: $message");
+    //     _navigateToItemDetail(message);
+    //   },
+    // );
+
+    
   @override
   Widget build(BuildContext context) {
- 
-   return MultiProvider(
-         providers:[
-        ChangeNotifierProvider(
-       create: (context) => UserProvider()),
-       StreamProvider( create: (context)=> AuthService().user),
-       StreamProvider( create: (context)=> DatabaseUser().userDoc),
-
-         ],
-      
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => UserProvider()),
+          StreamProvider(create: (context) => AuthService().user),
+          StreamProvider(create: (context) => DatabaseUser().userDoc),
+        ],
         child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Twitter Clone',
-      theme: ThemeData(
-        primaryColor: Color(0xff15202C),
-        primaryColorDark: Color(0xff1B2939),
-        accentColor: Color(0xff1CA1F1),
-        iconTheme: IconThemeData(color: Color(0xff1CA1F1))
-      ),
-      home: NavigationPage(),
-    )
-   );
+          debugShowCheckedModeBanner: false,
+          title: 'Twitter Clone',
+          theme: ThemeData(
+              primaryColor: Color(0xff15202C),
+              primaryColorDark: Color(0xff1B2939),
+              accentColor: Color(0xff1CA1F1),
+              iconTheme: IconThemeData(color: Color(0xff1CA1F1))),
+          home: NavigationPage(),
+        ));
   }
 }

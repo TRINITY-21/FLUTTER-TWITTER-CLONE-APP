@@ -1,8 +1,7 @@
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:twitterClone/models/userDocModel.dart';
-import 'package:twitterClone/models/userModel.dart';
+
 
 class DatabaseUser {
   String uid;

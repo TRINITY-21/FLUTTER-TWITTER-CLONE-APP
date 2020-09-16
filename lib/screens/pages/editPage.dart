@@ -1,14 +1,9 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:twitterClone/models/userModel.dart';
-import 'package:twitterClone/provider/userProvider.dart';
-import 'package:twitterClone/services/databaseUser.dart';
+
 
 import 'package:twitterClone/utils/googleFont.dart';
 
@@ -19,43 +14,15 @@ class SettingsForm extends StatefulWidget {
 
 class _SettingsFormState extends State<SettingsForm> {
   final _formKey = GlobalKey<FormState>();
+
   String uid;
   String profilePic;
   String username;
   bool userInfo = false;
 
-  Future getUserInfo() async {
-    // ignore: await_only_futures
-    try {
-      final user = FirebaseAuth.instance.currentUser;
 
-      DocumentSnapshot userDocu = await db.doc(user.uid).get();
-      setState(() {
-        username = userDocu.data()['username'];
-        profilePic = userDocu.data()['profilePic'];
-        userInfo = true;
-        //uid = userDocu.data()['uid'];
-      });
-
-      print(userDocu.data());
-      print(username);
-    } on Exception catch (e) {
-      print(e.toString());
-    }
-  }
 
   final TextEditingController _usernameController = TextEditingController();
-  final UserProvider userEdit = UserProvider();
-  // ignore: unused_field
-  String _currentName;
-  String _currentPic;
-
-  getUserID() {
-    final user = FirebaseAuth.instance.currentUser;
-    setState(() {
-      uid = user.uid;
-    });
-  }
 
   optionDialog() {
     return showDialog(
@@ -93,7 +60,7 @@ class _SettingsFormState extends State<SettingsForm> {
   Future uploadPic() async {
     // ignore: await_only_futures
 
-    StorageUploadTask _storeUpload = await tweetImg.child(uid).putFile(imgPath);
+    StorageUploadTask _storeUpload = tweetImg.child(uid).putFile(imgPath);
     StorageTaskSnapshot _storageTask = await _storeUpload.onComplete;
     String downloadUrl = await _storageTask.ref.getDownloadURL();
     return downloadUrl;
@@ -112,21 +79,18 @@ class _SettingsFormState extends State<SettingsForm> {
     }
   }
 
-  updateUser(String value) async {
-    return db.doc(uid).update({'username': value});
-  }
+
 
   @override
   void initState() {
-    getUserID();
-    getUserInfo();
+    
+  
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserModel>(context);
 
     return userInfo == true
         ? Form(
@@ -159,7 +123,7 @@ class _SettingsFormState extends State<SettingsForm> {
                       keyboardType: TextInputType.visiblePassword,
                       obscureText: false,
                       onChanged: (value) {
-                        userEdit.changeName(value);
+                       
                       },
                       validator: (value) {
                         if (value.isEmpty) {
@@ -205,12 +169,9 @@ class _SettingsFormState extends State<SettingsForm> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
-                        await updateUser(_usernameController.text);
                         
-                        Navigator.pop(context);
 
-                        print(_currentName);
-                        print(_usernameController.text);
+                        Navigator.pop(context);
                       }
                     }),
               ],
