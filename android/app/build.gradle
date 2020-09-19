@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // TODO: Specify your own unique Application.kt ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.twitterClone"
         minSdkVersion 21
         targetSdkVersion 28
@@ -61,6 +61,7 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.google.firebase:firebase-messaging:<latest_version>'
+    implementation "com.google.firebase:firebase-messaging:20.2.4"
+
 
 }

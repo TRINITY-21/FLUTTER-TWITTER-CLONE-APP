@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:twitterClone/screens/commentsPage.dart';
 import 'package:twitterClone/utils/googleFont.dart';
@@ -20,6 +23,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   String username;
   bool dataInfo = false;
   int followers;
+  // int notification;
   int following;
   bool isFollowing = false;
 
@@ -55,12 +59,17 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
       final followingDoc =
           await db.doc(widget.viewId).collection('following').get();
 
+      // final notificationDoc =
+      //     await db.doc(uid).collection('notification').get();
+
       setState(() {
         username = userDocu.data()['username'];
         profilePic = userDocu.data()['profilePic'];
         dataInfo = true;
         followers = follwersDoc.docs.length;
         following = followingDoc.docs.length;
+        // notification = notificationDoc.docs.length;
+        // print(notification);
       });
 
       print(userDocu.data());
@@ -100,14 +109,23 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
 
   followUser() async {
     final user = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot userDoc = await db.doc(user.uid).get();
+    DocumentSnapshot userD = await db.doc(widget.viewId).get();
 
     DocumentSnapshot follow =
         await db.doc(widget.viewId).collection('followers').doc(user.uid).get();
 
     if (!follow.exists) {
       db.doc(widget.viewId).collection('followers').doc(user.uid).set({});
+      db.doc(widget.viewId).collection('notification').doc(user.uid).set({
+        'title': userD.data()['username'] + ' @tweetMe',
+        'message':
+            userDoc.data()['username'] + '@tweetMe started following you',
+        'date': FieldValue.serverTimestamp(),
+      });
       setState(() {
         followers++;
+        // notification++;
         //following++;
         isFollowing = true;
       });
@@ -118,10 +136,12 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     } else {
       db.doc(widget.viewId).collection('followers').doc(user.uid).delete();
       print('followed delete');
+      db.doc(widget.viewId).collection('notification').doc(user.uid).delete();
 
       db.doc(user.uid).collection('following').doc(widget.viewId).delete();
       setState(() {
         followers--;
+        // notification--;
         //following--;
         isFollowing = false;
       });
@@ -129,12 +149,65 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     }
   }
 
+  ///////////  FCM MESSAGE  ////////////////
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  // Future getToken() async {
+  //   String token = await _firebaseMessaging.getToken();
+  //   assert(token != null);
+  //   print(token);
+  // }
+
   @override
   void initState() {
     super.initState();
     getUserID();
     getUserTweets();
     getUserInfo();
+    // getToken();
+
+    ///////// firebase messaging test
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage:$message");
+        showDialogNotification("Notification", "$message");
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        showDialogNotification("Notification", "$message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        showDialogNotification("Notification", "$message");
+      },
+    );
+
+    //// IOS permission
+    if (Platform.isIOS) {
+      _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(
+            sound: true, badge: true, alert: true, provisional: false),
+      );
+    }
+  }
+
+  showDialogNotification(String title, String description) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(description),
+            actions: [
+              FlatButton(
+                child: Text('ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -166,14 +239,15 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
               onTap: () async {
                 //await authService.logout();
               },
-              child: dataInfo == true? CircleAvatar(
-                backgroundColor:  Colors.purple,
-                radius: 20,
-                backgroundImage: NetworkImage(
-                    profilePic),
-                    
-              ): Text(''),
+              child: dataInfo == true
+                  ? CircleAvatar(
+                      backgroundColor: Colors.purple,
+                      radius: 20,
+                      backgroundImage: NetworkImage(profilePic),
+                    )
+                  : Text(''),
             ),
+          
           ],
         ),
         body: dataInfo == true
@@ -189,9 +263,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                       child: Image(
                         image: NetworkImage(
                           profilePic,
-                          
                         ),
-                        
                       )),
                   Container(
                     margin: EdgeInsets.only(
@@ -202,9 +274,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                       radius: 35,
                       backgroundImage: NetworkImage(
                         profilePic,
-                        
                       ),
-                      
                       backgroundColor: Colors.purpleAccent,
                     ),
                   ),
@@ -244,7 +314,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                     child: Column(
                       children: [
                         Text(username.toUpperCase(),
-                        textScaleFactor: 1.3,
+                            textScaleFactor: 1.3,
                             style:
                                 googleFont(20, Colors.white, FontWeight.w500)),
                         SizedBox(height: 15),
@@ -281,7 +351,6 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                                     15, Colors.white, FontWeight.w400)),
                           ],
                         ),
-                        
                         SizedBox(height: 10),
                         Container(
                             width: MediaQuery.of(context).size.width / 4,
@@ -296,12 +365,9 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                                 "Tweets",
                                 style: googleFont(
                                     15, Colors.white, FontWeight.w500),
-                                    
                               ),
                             )),
-
                         SizedBox(height: 20),
-
                         StreamBuilder(
                             stream: userStream,
                             builder: (context, snapshot) {
@@ -516,8 +582,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                       ],
                     ),
                   ),
-                ])
-                )
+                ]))
             : Center(child: CircularProgressIndicator()));
   }
 }

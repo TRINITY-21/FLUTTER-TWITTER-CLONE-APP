@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twitterClone/provider/userProvider.dart';
@@ -13,9 +14,18 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+
   var usernameController = TextEditingController();
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
+
+ 
+
+  // @override
+  // void initState() {
+
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +42,17 @@ class _SignUpPageState extends State<SignUpPage> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Welcome to",
-                    style: googleFont(20, Colors.white, FontWeight.w300)),
-                SizedBox(width: 5),
-                Text("Tweet",
-                    style: googleFont(20, Colors.white, FontWeight.w500)),
-                SizedBox(width:2 ),
-                Text("Me",
-                    style: googleFont(20, Colors.purple, FontWeight.bold)),
-              ],
-            ),
+                  children: [
+                    Text("Welcome to",
+                        style: googleFont(20, Colors.white, FontWeight.w300)),
+                    SizedBox(width: 5),
+                    Text("Tweet",
+                        style: googleFont(20, Colors.white, FontWeight.w500)),
+                    SizedBox(width: 2),
+                    Text("Me",
+                        style: googleFont(20, Colors.purple, FontWeight.bold)),
+                  ],
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -64,7 +74,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: TextFormField(
                       controller: usernameController,
                       keyboardType: TextInputType.visiblePassword,
-                      
                       onChanged: (value) {
                         userProvider.changeName(value);
                       },
@@ -72,11 +81,12 @@ class _SignUpPageState extends State<SignUpPage> {
                         filled: true,
                         fillColor: Colors.white,
                         labelText: "Username",
-                        labelStyle: googleFont(15,Colors.purple, FontWeight.w300),
+                        labelStyle:
+                            googleFont(15, Colors.purple, FontWeight.w300),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: Icon(Icons.person,color:Colors.purple),
+                        prefixIcon: Icon(Icons.person, color: Colors.purple),
                       ),
                     )),
                 SizedBox(
@@ -95,11 +105,12 @@ class _SignUpPageState extends State<SignUpPage> {
                         filled: true,
                         fillColor: Colors.white,
                         labelText: "Email",
-                        labelStyle: googleFont(15,Colors.purple, FontWeight.w300),
+                        labelStyle:
+                            googleFont(15, Colors.purple, FontWeight.w300),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: Icon(Icons.email,color:Colors.purple),
+                        prefixIcon: Icon(Icons.email, color: Colors.purple),
                       ),
                     )),
                 SizedBox(
@@ -119,11 +130,12 @@ class _SignUpPageState extends State<SignUpPage> {
                         filled: true,
                         fillColor: Colors.white,
                         labelText: "Password",
-                        labelStyle: googleFont(15,Colors.purple, FontWeight.w300),
+                        labelStyle:
+                            googleFont(15, Colors.purple, FontWeight.w300),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: Icon(Icons.lock,color:Colors.purple),
+                        prefixIcon: Icon(Icons.lock, color: Colors.purple),
                       ),
                     )),
                 SizedBox(
@@ -153,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   children: [
                     Text(
                       "Agree To Terms?",
-                      style: googleFont(15,Colors.white),
+                      style: googleFont(15, Colors.white),
                     ),
                     SizedBox(width: 10),
                     InkWell(
@@ -167,20 +179,17 @@ class _SignUpPageState extends State<SignUpPage> {
                     )
                   ],
                 ),
-
-                 SizedBox(height: 40),
-
+                SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Designed By",
-                      style: googleFont(10,Colors.white),
+                      style: googleFont(10, Colors.white),
                     ),
                     SizedBox(width: 4),
                     Text("Trinity",
-                        style:
-                            googleFont(10, Colors.purple, FontWeight.w700)),
+                        style: googleFont(10, Colors.purple, FontWeight.w700)),
                   ],
                 )
               ],

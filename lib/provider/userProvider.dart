@@ -11,6 +11,7 @@ class UserProvider with ChangeNotifier {
   String _password;
   String _profilePic;
   String _email;
+  String _fcmToken;
 
   /// getters
 
@@ -18,12 +19,13 @@ class UserProvider with ChangeNotifier {
   String get password => _password;
   String get email => _email;
   String get profilePic => _profilePic;
+  String get fcmToken => _fcmToken;
 
   /// setters
 
   changeName(String value) {
     _name = value;
-        print(_name);
+    print(_name);
 
     notifyListeners();
   }
@@ -42,6 +44,12 @@ class UserProvider with ChangeNotifier {
   changePic(String value) {
     _profilePic = value;
     print(_profilePic);
+    notifyListeners();
+  }
+
+  changeFcmToken(String value) {
+    _fcmToken = value;
+    print(_fcmToken);
     notifyListeners();
   }
 

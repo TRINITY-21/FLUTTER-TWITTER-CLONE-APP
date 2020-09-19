@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:twitterClone/screens/commentsPage.dart';
 import 'package:twitterClone/screens/pages/addTweetPage.dart';
@@ -17,47 +16,62 @@ class TweetsPage extends StatefulWidget {
 
 class _TweetsPageState extends State<TweetsPage> {
   String uid;
-
+  int _counter;
   ///////////   Firebase Cloud Messaging implementation
-  
-final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  String _message = 'generate token';
-  String _token = 'token';
+  Future _incrementCounter() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final notificationNum = await db.doc(user.uid).collection('notification').get();
+
+    setState(() {
+      _counter = notificationNum.docs.length;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-   getUserID();
+    getUserID();
+    _incrementCounter();
 
-     ///////// firebase messaging test
-    
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        setState(() {
-          _message = '$message';
-        });
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        setState(() {
-          _message = '$message';
-        });
-      },
-      onResume: (Map<String, dynamic> message) async {
-        setState(() {
-          _message = '$message';
-        });
-      },
-    );
+    ///////// firebase messaging test
 
-    _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
-      setState(() {
-        _token = '$token';
-      });
-    });
+    //   _firebaseMessaging.configure(
+    //     onMessage: (Map<String, dynamic> message) async {
+    //       print("onMessage:$message");
+    //       showDialog(
+    //           context: context,
+    //           builder: (context) {
+    //             return AlertDialog(
+    //               title: Text(message['notification']['title']),
+    //               content: Text(message['notification']['body']),
+    //               actions: [
+    //                 FlatButton(
+    //                   child: Text('ok'),
+    //                   onPressed: () {
+    //                     Navigator.of(context).pop();
+    //                   },
+    //                 )
+    //               ],
+    //             );
+    //           });
+    //     },
+    //     // onLaunch: (Map<String, dynamic> message) async {
+    //     //   setState(() {
+    //     //     _message = '$message';
+    //     //   });
+    //     // },
+    //     // onResume: (Map<String, dynamic> message) async {
+    //     //   setState(() {
+    //     //     _message = '$message';
+    //     //   });
+    //     // },
+    //   );
 
-    print(_token);
-    print(_message);
+    //   getToken();
+
+    //   print(_token);
+    //   print(_message);
+    // }
   }
 
   Future getUserID() async {
@@ -66,7 +80,6 @@ final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
     return uid = user.uid;
   }
-
 
   /// likes and dislikes
 
@@ -90,6 +103,47 @@ final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
     //// update shares count
     DocumentSnapshot shareDoc = await tweetCol.doc(tid).get();
     tweetCol.doc(tid).update({'shares': shareDoc.data()['shares'] + 1});
+  }
+
+//// notification icon
+
+  Widget myAppBarIcon() {
+    return Container(
+      width: 30,
+      height: 30,
+      child: Stack(
+        children: [
+          Icon(
+            Icons.notifications,
+            color: Colors.white,
+            size: 30,
+          ),
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.topRight,
+            margin: EdgeInsets.only(top: 5),
+            child: Container(
+              width: 115,
+              height: 15,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xffc32c37),
+                  border: Border.all(color: Colors.white, width: 1)),
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: Center(
+                  child: Text(
+                    _counter.toString(),
+                    style: TextStyle(fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -129,7 +183,7 @@ final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
               height: 45,
             ),
             SizedBox(width: 30),
-            Icon(Icons.notifications_active),
+            myAppBarIcon(),
           ]),
           // actions: [
           //   InkWell(
@@ -149,7 +203,7 @@ final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
             stream: tweetCol.orderBy('username').snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return CircularProgressIndicator();
+                return Center(child: CircularProgressIndicator());
               }
               return ListView.builder(
                   itemCount: snapshot.data.docs.length,

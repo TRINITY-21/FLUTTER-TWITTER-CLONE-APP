@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twitterClone/provider/userProvider.dart';
@@ -13,15 +15,32 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  String fcmToken;
+
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
+
+  Future getToken() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+    FirebaseMessaging _fcm = FirebaseMessaging();
+    String token = await _fcm.getToken();
+
+    setState(() {
+      fcmToken = token;
+       db.doc(user.uid).update({'fcmToken': fcmToken});
+    print(fcmToken);
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-          backgroundColor: Theme.of(context).primaryColorDark,
+      backgroundColor: Theme.of(context).primaryColorDark,
       body: SingleChildScrollView(
         child: Container(
             margin: EdgeInsets.only(top: 100.0),
@@ -31,17 +50,17 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Welcome to",
-                    style: googleFont(20, Colors.white, FontWeight.w300)),
-                SizedBox(width: 5),
-                Text("Tweet",
-                    style: googleFont(20, Colors.white, FontWeight.w500)),
-                SizedBox(width:2 ),
-                Text("Me",
-                    style: googleFont(20, Colors.purple, FontWeight.bold)),
-              ],
-            ),
+                  children: [
+                    Text("Welcome to",
+                        style: googleFont(20, Colors.white, FontWeight.w300)),
+                    SizedBox(width: 5),
+                    Text("Tweet",
+                        style: googleFont(20, Colors.white, FontWeight.w500)),
+                    SizedBox(width: 2),
+                    Text("Me",
+                        style: googleFont(20, Colors.purple, FontWeight.bold)),
+                  ],
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -70,11 +89,12 @@ class _LoginPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         labelText: "Email",
-                        labelStyle: googleFont(15,Colors.purple,FontWeight.w300),
+                        labelStyle:
+                            googleFont(15, Colors.purple, FontWeight.w300),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: Icon(Icons.email, color:Colors.purple),
+                        prefixIcon: Icon(Icons.email, color: Colors.purple),
                       ),
                     )),
                 SizedBox(
@@ -94,11 +114,12 @@ class _LoginPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         labelText: "Password",
-                        labelStyle: googleFont(15,Colors.purple,FontWeight.w300),
+                        labelStyle:
+                            googleFont(15, Colors.purple, FontWeight.w300),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        prefixIcon: Icon(Icons.lock, color:Colors.purple),
+                        prefixIcon: Icon(Icons.lock, color: Colors.purple),
                       ),
                     )),
                 SizedBox(
@@ -106,6 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 InkWell(
                   onTap: () {
+                    getToken();
                     userProvider.signIn();
                     Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) => HomePage()));
@@ -128,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Text(
                       "Need an Account?",
-                      style: googleFont(15,Colors.white),
+                      style: googleFont(15, Colors.white),
                     ),
                     SizedBox(width: 10),
                     InkWell(
@@ -142,19 +164,17 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                  SizedBox(height: 80),
-
+                SizedBox(height: 80),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Designed By",
-                      style: googleFont(10,Colors.white),
+                      style: googleFont(10, Colors.white),
                     ),
                     SizedBox(width: 4),
                     Text("Trinity",
-                        style:
-                            googleFont(10, Colors.purple, FontWeight.w700)),
+                        style: googleFont(10, Colors.purple, FontWeight.w700)),
                   ],
                 )
               ],

@@ -11,7 +11,7 @@ class DatabaseUser {
 
   DatabaseUser({uid});
 
-  Future createDoc(String uid, String name, String email, String profilePic,
+  Future createDoc(String uid, String name, String email, String profilePic, String fcmToken,
       String password) async {
     return await _db.doc(uid).set({
       'uid': uid,
