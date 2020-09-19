@@ -4,7 +4,7 @@ A new Flutter project.
 
 
 
-![alt text](https://github.com/TRINITY-21/FLUTTER-TWITTER-CLONE-APP/blob/master/pro.PNG)
+![alt text](https://github.com/TRINITY-21/FLUTTER-TWITTER-CLONE-APP/blob/master/login.PNG)
 
 ## Getting Started
 
